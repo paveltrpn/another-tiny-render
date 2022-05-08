@@ -1,12 +1,20 @@
 package image
 
 import (
-	"image"
 	"image/jpeg"
 	"os"
 )
 
-func loadImage(fname string) image.Image {
+type Image_s struct {
+	data []uint8
+
+	width  int
+	height int
+	depth  int
+}
+
+func (img *Image_s) LoadFromJpegFile(fname string) {
+	// Load image file as image.Image interface
 	imagefile, err := os.Open(fname)
 	if err != nil {
 		println(err)
@@ -20,19 +28,21 @@ func loadImage(fname string) image.Image {
 		panic(0)
 	}
 
-	return imageData
-}
+	// Convert image.Image interface to []uint8 rgb slice
+	sz := imageData.Bounds()
 
-func imageToRGB(img image.Image) []uint8 {
-	sz := img.Bounds()
-	raw := make([]uint8, (sz.Max.X-sz.Min.X)*(sz.Max.Y-sz.Min.Y)*3)
+	img.width = sz.Max.X - sz.Min.X
+	img.height = sz.Max.Y - sz.Min.Y
+	img.depth = 3
+
+	img.data = make([]uint8, img.width*img.height*3)
+
 	idx := 0
 	for y := sz.Min.Y; y < sz.Max.Y; y++ {
 		for x := sz.Min.X; x < sz.Max.X; x++ {
-			r, g, b, _ := img.At(x, y).RGBA()
-			raw[idx], raw[idx+1], raw[idx+2] = uint8(r), uint8(g), uint8(b)
+			r, g, b, _ := imageData.At(x, y).RGBA()
+			img.data[idx], img.data[idx+1], img.data[idx+2] = uint8(r), uint8(g), uint8(b)
 			idx += 3
 		}
 	}
-	return raw
 }

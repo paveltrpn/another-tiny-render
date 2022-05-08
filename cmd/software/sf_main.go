@@ -68,6 +68,12 @@ func main() {
 	cnvs, _ := img.BuildCanvas(512, 512, 3)
 	cnvs.BrasenhamLine(10, 10, 500, 402)
 	cnvs.BrasenhamLine(400, 20, 40, 350)
+	cnvs.SetPenColor(14, 55, 245)
+	for i := 1; i < 6; i++ {
+		cnvs.BrasenhamCircle(256, 256, i*40)
+	}
+	cnvs.SetPenColor(10, 245, 89)
+	cnvs.DDALine(500, 10, 500, 500)
 
 	texture, _ := sdlGlobalState.render.CreateTexture(sdl.PIXELFORMAT_RGB24,
 		sdl.TEXTUREACCESS_TARGET, int32(cnvs.GetWidth()), int32(cnvs.GetHeight()))

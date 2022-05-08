@@ -3,6 +3,8 @@ package image
 import (
 	"errors"
 	"math"
+
+	alg "tiny-render-go/pkg/algebra_go"
 )
 
 type Canvas_s struct {
@@ -54,6 +56,12 @@ func (cnvs Canvas_s) GetHeight() int {
 
 func (cnvs Canvas_s) GetBpp() int {
 	return cnvs.bpp
+}
+
+func (cnvs *Canvas_s) SetPenColor(r, g, b uint8) {
+	cnvs.color_r = r
+	cnvs.color_b = b
+	cnvs.color_g = g
 }
 
 // Set color at to pixel at cnvs.data[x, y].
@@ -111,5 +119,65 @@ func (cnvs *Canvas_s) BrasenhamLine(xs, ys int, xe, ye int) {
 			err += dX
 			np_y += signY
 		}
+	}
+}
+
+func (cnvs *Canvas_s) BrasenhamCircle(cx, cy int, rad int) {
+	var (
+		x     int = 0
+		y     int = rad
+		delta int = 1 - 2*rad
+		error int = 0
+	)
+
+	for y >= 0 {
+		cnvs.PutPixel(cx+x, cy+y)
+		cnvs.PutPixel(cx+x, cy-y)
+		cnvs.PutPixel(cx-x, cy+y)
+		cnvs.PutPixel(cx-x, cy-y)
+
+		error = 2*(delta+y) - 1
+
+		if (delta < 0) && (error <= 0) {
+			x = x + 1
+			delta += 2*x + 1
+			continue
+		}
+
+		if (delta > 0) && (error > 0) {
+			y = y - 1
+			delta -= 2*y + 1
+			continue
+		}
+
+		x = x + 1
+		y = y - 1
+		delta += 2 * (x - y)
+	}
+}
+
+func (cnvs *Canvas_s) DDALine(xs, ys int, xe, ye int) {
+	var (
+		dx                      float32 = float32(xe - xs)
+		dy                      float32 = float32(ye - ys)
+		steps, Xinc, Yinc, X, Y float32
+	)
+
+	if alg.Fabs(dx) > alg.Fabs(dy) {
+		steps = alg.Fabs(dx)
+	} else {
+		steps = alg.Fabs(dy)
+	}
+
+	Xinc = dx / steps
+	Yinc = dy / steps
+
+	X = float32(xs)
+	Y = float32(ys)
+
+	for i := 0; i <= int(steps); i++ {
+		cnvs.PutPixel(int(X), int(Y))
+		X += Xinc
+		Y += Yinc
 	}
 }
