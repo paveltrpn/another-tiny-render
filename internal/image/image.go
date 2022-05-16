@@ -28,7 +28,7 @@ func (img *Image_s) LoadFromJpegFile(fname string) {
 		panic(0)
 	}
 
-	// Convert image.Image interface to []uint8 rgb slice
+	// Convert image.Image interface to []uint8 rgb sliceZ
 	sz := imageData.Bounds()
 
 	img.width = sz.Max.X - sz.Min.X

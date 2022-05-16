@@ -150,8 +150,8 @@ func (cnvs *Canvas_s) BrasenhamCircle(cx, cy int, rad int) {
 			continue
 		}
 
-		x = x + 1
-		y = y - 1
+		x += 1
+		y -= 1
 		delta += 2 * (x - y)
 	}
 }
