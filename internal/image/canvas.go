@@ -67,7 +67,7 @@ func (cnvs *Canvas_s) SetPenColor(r, g, b uint8) {
 // Set color to pixel at cnvs.data[x, y].
 // Color takes from corrent cnvs.color* fields.
 func (cnvs Canvas_s) PutPixel(x, y int) {
-	if (x >= cnvs.width) || (y >= cnvs.width) {
+	if (x >= cnvs.width) || (y >= cnvs.width) || (x <= 0) || (y <= 0) {
 		return
 	}
 
@@ -90,15 +90,13 @@ func (cnvs Canvas_s) PutSquareBrush(x, y, size int) {
 }
 
 // Fill circle sector of canvas with given color.
-// Equivalent of round brush with radius = rad.
-// NOT WORK PROPER BY NOW!!!!
+// Equivalent of round brush with radius = "rad".
+// Naive implementation - just draw a concentric
+// circles from radius zero to "rad" witch center
+// in x, y to emulate a filled circle brush.
 func (cnvs Canvas_s) PutRoundBrush(x, y, rad int) {
-	half_rad := rad / 2
-
-	for i := -half_rad; i < half_rad; i++ {
-		for j := i + half_rad; j < half_rad; j++ {
-			cnvs.PutPixel(x+i, y+j)
-		}
+	for i := 1; i < rad; i++ {
+		cnvs.BrasenhamCircle(x, y, i)
 	}
 }
 
@@ -129,10 +127,10 @@ func (cnvs *Canvas_s) BrasenhamLine(xs, ys int, xe, ye int) {
 		signY = -1
 	}
 
-	cnvs.PutRoundBrush(xe, ye, 20)
+	cnvs.PutRoundBrush(xe, ye, 15)
 
 	for (np_x != xe) || (np_y != ye) {
-		cnvs.PutRoundBrush(np_x, np_y, 20)
+		cnvs.PutRoundBrush(np_x, np_y, 15)
 
 		err2 = err * 2
 
