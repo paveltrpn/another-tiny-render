@@ -2,12 +2,11 @@ package image
 
 import (
 	"errors"
-	"math"
 
 	alg "tiny-render-go/pkg/algebra_go"
 )
 
-type Canvas_s struct {
+type SCanvas struct {
 	data   []uint8
 	width  int
 	height int
@@ -21,11 +20,11 @@ type Canvas_s struct {
 	color_b uint8
 }
 
-func BuildCanvas(xs, ys, bpp int) (Canvas_s, error) {
+func BuildCanvas(xs, ys, bpp int) (SCanvas, error) {
 	// check only depth parameter,
 	// maybe check canvas size bounds?
 	if (bpp < 3) || (bpp > 4) {
-		return Canvas_s{data: nil,
+		return SCanvas{data: nil,
 			width:  0,
 			height: 0,
 			bpp:    0}, errors.New("BuildCanvas(): Error! cnvs_bpp can't be less than zero")
@@ -33,7 +32,7 @@ func BuildCanvas(xs, ys, bpp int) (Canvas_s, error) {
 
 	byteArray := make([]uint8, xs*ys*bpp)
 
-	return Canvas_s{data: byteArray,
+	return SCanvas{data: byteArray,
 		width:   xs,
 		height:  ys,
 		bpp:     bpp,
@@ -42,23 +41,23 @@ func BuildCanvas(xs, ys, bpp int) (Canvas_s, error) {
 		color_b: 255}, nil
 }
 
-func (cnvs Canvas_s) GetDataPtr() []uint8 {
+func (cnvs SCanvas) GetDataPtr() []uint8 {
 	return cnvs.data
 }
 
-func (cnvs Canvas_s) GetWidth() int {
+func (cnvs SCanvas) GetWidth() int {
 	return cnvs.width
 }
 
-func (cnvs Canvas_s) GetHeight() int {
+func (cnvs SCanvas) GetHeight() int {
 	return cnvs.height
 }
 
-func (cnvs Canvas_s) GetBpp() int {
+func (cnvs SCanvas) GetBpp() int {
 	return cnvs.bpp
 }
 
-func (cnvs *Canvas_s) SetPenColor(r, g, b uint8) {
+func (cnvs *SCanvas) SetPenColor(r, g, b uint8) {
 	cnvs.color_r = r
 	cnvs.color_b = b
 	cnvs.color_g = g
@@ -66,7 +65,7 @@ func (cnvs *Canvas_s) SetPenColor(r, g, b uint8) {
 
 // Set color to pixel at cnvs.data[x, y].
 // Color takes from corrent cnvs.color* fields.
-func (cnvs Canvas_s) PutPixel(x, y int) {
+func (cnvs SCanvas) PutPixel(x, y int) {
 	if (x >= cnvs.width) || (y >= cnvs.width) || (x <= 0) || (y <= 0) {
 		return
 	}
@@ -79,7 +78,7 @@ func (cnvs Canvas_s) PutPixel(x, y int) {
 // Fill square sector of canvas with given color.
 // Obviously, equivalent of square brush with side
 // length equal to size.
-func (cnvs Canvas_s) PutSquareBrush(x, y, size int) {
+func (cnvs SCanvas) PutSquareBrush(x, y, size int) {
 	half_size := size / 2
 
 	for i := -half_size; i < half_size; i++ {
@@ -94,7 +93,7 @@ func (cnvs Canvas_s) PutSquareBrush(x, y, size int) {
 // Naive implementation - just draw a concentric
 // circles from radius zero to "rad" witch center
 // in x, y to emulate a filled circle brush.
-func (cnvs Canvas_s) PutRoundBrush(x, y, rad int) {
+func (cnvs SCanvas) PutRoundBrush(x, y, rad int) {
 	for i := 1; i < rad; i++ {
 		cnvs.BrasenhamCircle(x, y, i)
 	}
@@ -102,7 +101,7 @@ func (cnvs Canvas_s) PutRoundBrush(x, y, rad int) {
 
 // Draw a line at canvas with Brasenham algoritm.
 // Coordinates starts at upper left corner of canvas
-func (cnvs *Canvas_s) BrasenhamLine(xs, ys int, xe, ye int) {
+func (cnvs *SCanvas) BrasenhamLine(xs, ys int, xe, ye int) {
 	var (
 		signX, signY, err, err2 int
 		// now point coords
@@ -110,8 +109,8 @@ func (cnvs *Canvas_s) BrasenhamLine(xs, ys int, xe, ye int) {
 		np_y int = ys
 	)
 
-	dX := int(math.Abs((float64)(xe - xs)))
-	dY := int(math.Abs((float64)(ye - ys)))
+	dX := int(alg.Fabs(float32(xe - xs)))
+	dY := int(alg.Fabs(float32(ye - ys)))
 
 	err = dX - dY
 
@@ -146,7 +145,7 @@ func (cnvs *Canvas_s) BrasenhamLine(xs, ys int, xe, ye int) {
 	}
 }
 
-func (cnvs *Canvas_s) BrasenhamCircle(cx, cy int, rad int) {
+func (cnvs *SCanvas) BrasenhamCircle(cx, cy int, rad int) {
 	var (
 		x     int = 0
 		y     int = rad
@@ -180,7 +179,7 @@ func (cnvs *Canvas_s) BrasenhamCircle(cx, cy int, rad int) {
 	}
 }
 
-func (cnvs *Canvas_s) DDALine(xs, ys int, xe, ye int) {
+func (cnvs *SCanvas) DDALine(xs, ys int, xe, ye int) {
 	var (
 		dx                      float32 = float32(xe - xs)
 		dy                      float32 = float32(ye - ys)
@@ -200,7 +199,7 @@ func (cnvs *Canvas_s) DDALine(xs, ys int, xe, ye int) {
 	Y = float32(ys)
 
 	for i := 0; i <= int(steps); i++ {
-		cnvs.PutPixel(int(X), int(Y))
+		cnvs.PutSquareBrush(int(X), int(Y), 34)
 		X += Xinc
 		Y += Yinc
 	}

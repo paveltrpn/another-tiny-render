@@ -120,7 +120,7 @@ func main() {
 	appState.Print()
 
 	flatLight := srv.SOglProgram{Name: "flat shade"}
-	flatLight.AppendShader([]uint32{gl.VERTEX_SHADER, gl.FRAGMENT_SHADER}, []string{"vs.glsl", "fs.glsl"})
+	flatLight.AppendShader([]uint32{gl.VERTEX_SHADER, gl.FRAGMENT_SHADER}, []string{"assets/vs.glsl", "assets/fs.glsl"})
 	flatLight.LinkProgram()
 
 	flatLight.Use()

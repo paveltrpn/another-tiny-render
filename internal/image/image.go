@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-type Image_s struct {
+type SImage struct {
 	data []uint8
 
 	width  int
@@ -13,7 +13,7 @@ type Image_s struct {
 	depth  int
 }
 
-func (img *Image_s) LoadFromJpegFile(fname string) {
+func (img *SImage) LoadFromJpegFile(fname string) {
 	// Load image file as image.Image interface
 	imagefile, err := os.Open(fname)
 	if err != nil {

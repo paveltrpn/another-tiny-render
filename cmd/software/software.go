@@ -1,6 +1,8 @@
 package main
 
 import (
+	"math/rand"
+	"time"
 	img "tiny-render-go/internal/image"
 
 	"github.com/veandco/go-sdl2/sdl"
@@ -61,19 +63,42 @@ func destroySdlGlobalState(state *sdlGlobalState_s) {
 	sdl.Quit()
 }
 
+func getRandColor() (uint8, uint8, uint8) {
+	return uint8(rand.Intn(255)),
+		uint8(rand.Intn(255)),
+		uint8(rand.Intn(255))
+}
+
 func main() {
-	sdlGlobalState := initSdlGlobalState(800, 600, "sdl")
+	var (
+		r, g, b uint8
+	)
+
+	// just for random colors, may remove later
+	rand.Seed(time.Now().UnixNano())
+
+	sdlGlobalState := initSdlGlobalState(512, 512, "sdl")
 	defer destroySdlGlobalState(&sdlGlobalState)
 
 	cnvs, _ := img.BuildCanvas(512, 512, 3)
+
+	r, g, b = getRandColor()
+	cnvs.SetPenColor(r, g, b)
 	cnvs.BrasenhamLine(10, 10, 500, 402)
+
+	r, g, b = getRandColor()
+	cnvs.SetPenColor(r, g, b)
 	cnvs.BrasenhamLine(400, 20, 40, 350)
-	cnvs.SetPenColor(14, 55, 245)
-	for i := 1; i < 6; i++ {
+
+	for i := 1; i < 7; i++ {
+		r, g, b = getRandColor()
+		cnvs.SetPenColor(r, g, b)
 		cnvs.BrasenhamCircle(256, 256, i*40)
 	}
-	cnvs.SetPenColor(10, 245, 89)
-	cnvs.DDALine(500, 10, 500, 500)
+
+	r, g, b = getRandColor()
+	cnvs.SetPenColor(r, g, b)
+	cnvs.DDALine(440, 110, 40, 426)
 
 	texture, _ := sdlGlobalState.render.CreateTexture(sdl.PIXELFORMAT_RGB24,
 		sdl.TEXTUREACCESS_TARGET, int32(cnvs.GetWidth()), int32(cnvs.GetHeight()))
