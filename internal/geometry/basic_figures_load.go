@@ -58,30 +58,25 @@ var boxColors = []float32{
 	0.2, 0.5, 0.5, 0.2, 0.5, 0.5, 0.2, 0.5, 0.5,
 }
 
-type SGmtryInstance struct {
-	// Points in space coordinates, three floats per vertex
-	Vertices []float32
-	// Only triangle faces
-	FaceIds []uint32
-	// Per vertex normals
-	VtNormals []float32
-	// Per face index texture coords
-	FaceTexCoords []float32
+func (gmtry *SGmtryInstance) MakeBox() {
+	if gmtry.IsExist {
+		println("gmtry.MakeBox(): object %v is allready allocated!", gmtry.Name)
+		return
+	}
 
-	// Per vertex color
-	VtColors []float32
-}
-
-func (gmtry *SGmtryInstance) LoadBox() {
 	gmtry.Vertices = make([]float32, len(boxPoints))
 	copy(gmtry.Vertices, boxPoints)
 
 	gmtry.FaceIds = make([]uint32, len(boxFaceIds))
 	copy(gmtry.FaceIds, boxFaceIds)
 
-	gmtry.VtNormals = make([]float32, len(boxVtNormals))
-	copy(gmtry.VtNormals, boxVtNormals)
+	gmtry.VertNormals = make([]float32, len(boxVtNormals))
+	copy(gmtry.VertNormals, boxVtNormals)
 
 	gmtry.VtColors = make([]float32, len(boxColors))
 	copy(gmtry.VtColors, boxColors)
+
+	gmtry.FileType = BUILTIN
+	gmtry.IsExist = true
+	gmtry.Name = "Box"
 }

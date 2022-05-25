@@ -1,11 +1,11 @@
 package main
 
 import (
+	srv "another-tiny-render/internal/service"
+	alg "another-tiny-render/pkg/algebra_go"
 	"fmt"
 	"math"
 	"runtime"
-	srv "tiny-render-go/internal/service"
-	alg "tiny-render-go/pkg/algebra_go"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"

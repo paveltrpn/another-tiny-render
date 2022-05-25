@@ -1,11 +1,11 @@
 package service
 
 import (
+	alg "another-tiny-render/pkg/algebra_go"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
-	alg "tiny-render-go/pkg/algebra_go"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 )

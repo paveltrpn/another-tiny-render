@@ -1,9 +1,9 @@
 package main
 
 import (
+	img "another-tiny-render/internal/image"
 	"math/rand"
 	"time"
-	img "tiny-render-go/internal/image"
 
 	"github.com/veandco/go-sdl2/sdl"
 )

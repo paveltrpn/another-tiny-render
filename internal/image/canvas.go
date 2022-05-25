@@ -3,7 +3,7 @@ package image
 import (
 	"errors"
 
-	alg "tiny-render-go/pkg/algebra_go"
+	alg "another-tiny-render/pkg/algebra_go"
 )
 
 type SCanvas struct {
