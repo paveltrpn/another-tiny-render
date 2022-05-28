@@ -13,6 +13,22 @@ type SImage struct {
 	depth  int
 }
 
+func (img SImage) GetWidth() int {
+	return img.width
+}
+
+func (img SImage) GetHeight() int {
+	return img.height
+}
+
+func (img SImage) GetDepth() int {
+	return img.depth
+}
+
+func (img SImage) GetDataPtr() *uint8 {
+	return &img.data[0]
+}
+
 func (img *SImage) LoadFromJpegFile(fname string) {
 	// Load image file as image.Image interface
 	imagefile, err := os.Open(fname)
@@ -28,7 +44,7 @@ func (img *SImage) LoadFromJpegFile(fname string) {
 		panic(0)
 	}
 
-	// Convert image.Image interface to []uint8 rgb sliceZ
+	// Convert image.Image interface to []uint8 rgb slice
 	sz := imageData.Bounds()
 
 	img.width = sz.Max.X - sz.Min.X
