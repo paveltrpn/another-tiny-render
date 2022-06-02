@@ -82,6 +82,9 @@ func main() {
 
 	cnvs, _ := img.BuildCanvas(512, 512, 3)
 
+	cnvs.DrawChecker(32)
+	cnvs.MultPerComponent(0.8, 0.3, 0.1)
+
 	r, g, b = getRandColor()
 	cnvs.SetPenColor(r, g, b)
 	cnvs.BrasenhamLine(10, 10, 500, 402)

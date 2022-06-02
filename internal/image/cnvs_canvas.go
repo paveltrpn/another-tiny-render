@@ -11,13 +11,11 @@ type SCanvas struct {
 	width  int
 	height int
 
-	bpp int
+	depth int
 
 	// color components that used for PutPixel()
 	// "pen" color, default - white defined in BuildCanvas()
-	color_r uint8
-	color_g uint8
-	color_b uint8
+	pen_color [3]uint8
 }
 
 func BuildCanvas(xs, ys, bpp int) (SCanvas, error) {
@@ -27,18 +25,16 @@ func BuildCanvas(xs, ys, bpp int) (SCanvas, error) {
 		return SCanvas{data: nil,
 			width:  0,
 			height: 0,
-			bpp:    0}, errors.New("BuildCanvas(): Error! cnvs_bpp can't be less than zero")
+			depth:  0}, errors.New("BuildCanvas(): Error! Wrong canvas pixel depth value")
 	}
 
 	byteArray := make([]uint8, xs*ys*bpp)
 
 	return SCanvas{data: byteArray,
-		width:   xs,
-		height:  ys,
-		bpp:     bpp,
-		color_r: 255,
-		color_g: 255,
-		color_b: 255}, nil
+		width:     xs,
+		height:    ys,
+		depth:     bpp,
+		pen_color: [...]uint8{255, 255, 255}}, nil
 }
 
 func (cnvs SCanvas) GetDataPtr() []uint8 {
@@ -53,26 +49,26 @@ func (cnvs SCanvas) GetHeight() int {
 	return cnvs.height
 }
 
-func (cnvs SCanvas) GetBpp() int {
-	return cnvs.bpp
+func (cnvs SCanvas) GetDepth() int {
+	return cnvs.depth
 }
 
 func (cnvs *SCanvas) SetPenColor(r, g, b uint8) {
-	cnvs.color_r = r
-	cnvs.color_b = b
-	cnvs.color_g = g
+	cnvs.pen_color[0] = r
+	cnvs.pen_color[1] = b
+	cnvs.pen_color[2] = g
 }
 
-// Set color to pixel at cnvs.data[x, y].
+// Set color to pixel at pen_color[x, y].
 // Color takes from corrent cnvs.color* fields.
 func (cnvs SCanvas) PutPixel(x, y int) {
 	if (x >= cnvs.width) || (y >= cnvs.width) || (x <= 0) || (y <= 0) {
 		return
 	}
 
-	cnvs.data[((x*cnvs.bpp)*cnvs.height+y*cnvs.bpp)+0] = cnvs.color_r
-	cnvs.data[((x*cnvs.bpp)*cnvs.height+y*cnvs.bpp)+1] = cnvs.color_g
-	cnvs.data[((x*cnvs.bpp)*cnvs.height+y*cnvs.bpp)+2] = cnvs.color_b
+	cnvs.data[((x*cnvs.depth)*cnvs.height+y*cnvs.depth)+0] = cnvs.pen_color[0]
+	cnvs.data[((x*cnvs.depth)*cnvs.height+y*cnvs.depth)+1] = cnvs.pen_color[1]
+	cnvs.data[((x*cnvs.depth)*cnvs.height+y*cnvs.depth)+2] = cnvs.pen_color[2]
 }
 
 // Fill square sector of canvas with given color.
@@ -126,10 +122,10 @@ func (cnvs *SCanvas) BrasenhamLine(xs, ys int, xe, ye int) {
 		signY = -1
 	}
 
-	cnvs.PutRoundBrush(xe, ye, 15)
+	cnvs.PutPixel(xe, ye)
 
 	for (np_x != xe) || (np_y != ye) {
-		cnvs.PutRoundBrush(np_x, np_y, 15)
+		cnvs.PutPixel(np_x, np_y)
 
 		err2 = err * 2
 
@@ -199,8 +195,24 @@ func (cnvs *SCanvas) DDALine(xs, ys int, xe, ye int) {
 	Y = float32(ys)
 
 	for i := 0; i <= int(steps); i++ {
-		cnvs.PutSquareBrush(int(X), int(Y), 34)
+		cnvs.PutPixel(int(X), int(Y))
 		X += Xinc
 		Y += Yinc
 	}
+}
+
+func (cnvs *SCanvas) getPixelIndex(row, col int) int {
+	return (row*3)*cnvs.height + col*cnvs.depth
+}
+
+func (cnvs *SCanvas) getPixelRVal(row, col int) uint8 {
+	return cnvs.data[cnvs.getPixelIndex(row, col)+0]
+}
+
+func (cnvs *SCanvas) getPixelGVal(row, col int) uint8 {
+	return cnvs.data[cnvs.getPixelIndex(row, col)+1]
+}
+
+func (cnvs *SCanvas) getPixelBVal(row, col int) uint8 {
+	return cnvs.data[cnvs.getPixelIndex(row, col)+2]
 }

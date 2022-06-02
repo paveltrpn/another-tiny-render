@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"runtime"
 
@@ -77,7 +78,7 @@ func main() {
 
 	prspMtrx := alg.Mtrx4FromPerspective(alg.DegToRad(45.0), Aspect, 0.01, 100.0)
 	mdlMtrx := alg.Mtrx4FromLookAt(alg.Vec3{5.0, 3.0, 45.0}, alg.Vec3{0.0, -7.0, 0.0}, alg.Vec3{0.0, 1.0, 0.0})
-	rtn := alg.Mtrx4FromAxisAngl(alg.Vec3{0.0, 1.0, 0.0}, alg.DegToRad(0.1))
+	rtn := alg.Mtrx4FromAxisAngl(alg.Vec3{0.0, 1.0, 0.0}, alg.DegToRad(0.5))
 
 	var foo gmtry.SGmtryInstance
 	err := foo.LoadFromWavefrontOBJ("demon_baby.obj")
@@ -93,13 +94,53 @@ func main() {
 	gl.PointSize(13.0)
 
 	var tex uint32
-	var texFile img.SImage
-	texFile.LoadFromJpegFile("diffuse.jpg")
+	texFile, _ := img.BuildCanvas(512, 512, 3)
+	// texFile.LoadFromJpegFile("diffuse.jpg")
+	texFile.DrawChecker(16)
+
+	{
+		var (
+			r, g, b uint8
+		)
+
+		getRandColor := func() (uint8, uint8, uint8) {
+			return uint8(rand.Intn(255)),
+				uint8(rand.Intn(255)),
+				uint8(rand.Intn(255))
+		}
+
+		texFile.MultPerComponent(0.8, 1.8, 0.1)
+
+		r, g, b = getRandColor()
+		texFile.SetPenColor(r, g, b)
+		texFile.BrasenhamLine(10, 10, 500, 402)
+
+		r, g, b = getRandColor()
+		texFile.SetPenColor(r, g, b)
+		texFile.BrasenhamLine(400, 20, 40, 350)
+
+		for i := 1; i < 32; i++ {
+			r, g, b = getRandColor()
+			texFile.SetPenColor(r, g, b)
+			texFile.BrasenhamCircle(256, 256, i*15)
+		}
+
+		r, g, b = getRandColor()
+		texFile.SetPenColor(r, g, b)
+		texFile.DDALine(440, 110, 40, 426)
+	}
 
 	gl.Enable(gl.TEXTURE_2D)
 	gl.GenTextures(1, &tex)
 	gl.BindTexture(gl.TEXTURE_2D, tex)
-	gl.TexImage2D(gl.TEXTURE_2D, 0, int32(texFile.GetDepth()), int32(texFile.GetWidth()), int32(texFile.GetHeight()), 0, gl.RGB, gl.UNSIGNED_BYTE, gl.Ptr(texFile.GetDataPtr()))
+	gl.TexImage2D(gl.TEXTURE_2D, 0, int32(texFile.GetDepth()),
+		int32(texFile.GetWidth()),
+		int32(texFile.GetHeight()),
+		0,
+		gl.RGB,
+		gl.UNSIGNED_BYTE,
+		gl.Ptr(texFile.GetDataPtr()))
+
 	// gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 	// gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
