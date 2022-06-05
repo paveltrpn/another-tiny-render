@@ -72,6 +72,14 @@ func RegisterGlfwCallbacks() {
 func main() {
 	runtime.LockOSThread()
 
+	// Test kernel multiplication
+	{
+		foo := img.ExtractSurround(2)
+		for _, i := range foo {
+			println(i)
+		}
+	}
+
 	InitGlfwWindow()
 	SetOglDefaults()
 	RegisterGlfwCallbacks()
@@ -81,7 +89,7 @@ func main() {
 	rtn := alg.Mtrx4FromAxisAngl(alg.Vec3{0.0, 1.0, 0.0}, alg.DegToRad(0.5))
 
 	var foo gmtry.SGmtryInstance
-	err := foo.LoadFromWavefrontOBJ("demon_baby.obj")
+	err := foo.LoadFromWavefrontOBJ("../../assets/demon_baby/demon_baby.obj")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

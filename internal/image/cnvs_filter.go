@@ -1,5 +1,11 @@
 package image
 
+import (
+	alg "another-tiny-render/pkg/algebra_go"
+	"math"
+)
+
+// Mult float and uint8 and clamp result to byte range [0...255]
 func multWithClamp[T float32 | float64](f T, val uint8) uint8 {
 	tmp := T(val) * f
 	if tmp > 255 {
@@ -44,4 +50,77 @@ func (cnvs *SCanvas) MultPerComponent(fR, fG, fB float32) {
 			cnvs.data[((row*3)*cnvs.height+col*3)+2] = multWithClamp(fB, pixel[2])
 		}
 	}
+}
+
+// Calculate new pixel color as average sum of surrounding
+// pixels (covered by square kernel) multiplyed at corresponding
+// kernel numbers.
+func (cnvs *SCanvas) MultByKernel(krnl []float32) {
+
+}
+
+func ExtractSurround(pixId int32) *[25]int32 {
+	const (
+		rows = 7 // 0...6
+		clms = 7 // 0...6
+
+		krnlSize     = 5 // Only odd numbers
+		halfKrnlSize = krnlSize / 2
+	)
+
+	var (
+		r, c     int32
+		row, cmn int32
+	)
+
+	rt := new([krnlSize * krnlSize]int32)
+
+	rowById := pixId / rows
+	cmnById := pixId - rowById*rows
+
+	i := 0
+	for r = -halfKrnlSize; r < halfKrnlSize+1; r++ {
+		for c = -halfKrnlSize; c < halfKrnlSize+1; c++ {
+			row = rowById + r
+			cmn = cmnById + c
+			if (row < 0) || (cmn < 0) {
+				rt[i] = -1
+			} else {
+				rt[i] = row*rows + cmn
+			}
+			i++
+		}
+	}
+
+	return rt
+}
+
+func genGausFilterKernel() [5][5]float32 {
+	var (
+		// initialising standard deviation to 1.0
+		sigma float32 = 1.0
+		r     float32
+		s     float32 = 2.0 * sigma * sigma
+		// sum is for normalization
+		sum    float32 = 0.0
+		kernel [5][5]float32
+	)
+
+	// generating 5x5 kernel
+	for x := -2; x <= 2; x++ {
+		for y := -2; y <= 2; y++ {
+			r = alg.Sqrtf(float32(x*x + y*y))
+			kernel[x+2][y+2] = (float32(alg.Exp((-(r * r) / s))) / (math.Pi * s))
+			sum += kernel[x+2][y+2]
+		}
+	}
+
+	// normalising the Kernel
+	for i := 0; i < 5; i++ {
+		for j := 0; j < 5; j++ {
+			kernel[i][j] /= sum
+		}
+	}
+
+	return kernel
 }
