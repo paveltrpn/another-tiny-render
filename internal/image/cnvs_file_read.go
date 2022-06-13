@@ -1,6 +1,7 @@
 package image
 
 import (
+	"image/color"
 	"image/jpeg"
 	"os"
 )
@@ -32,7 +33,11 @@ func (cnvs *SCanvas) LoadFromJpegFile(fname string) {
 	idx := 0
 	for y := sz.Min.Y; y < sz.Max.Y; y++ {
 		for x := sz.Min.X; x < sz.Max.X; x++ {
-			r, g, b, _ := imageData.At(x, y).RGBA()
+			rgba := imageData.At(x, y)
+			// Convert an alpha-premultiplied colors to non-alpha-premultiplied 32-bit color
+			nrgba := color.Model.Convert(color.NRGBAModel, rgba)
+			r, g, b, _ := nrgba.RGBA()
+
 			cnvs.data[idx], cnvs.data[idx+1], cnvs.data[idx+2] = uint8(r), uint8(g), uint8(b)
 			idx += 3
 		}

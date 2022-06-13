@@ -147,7 +147,7 @@ func main() {
 		0,
 		gl.RGB,
 		gl.UNSIGNED_BYTE,
-		gl.Ptr(texFile.GetDataPtr()))
+		texFile.GetDataUnsafePtr())
 
 	// gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 	// gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)

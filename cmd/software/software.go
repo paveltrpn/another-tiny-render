@@ -2,6 +2,7 @@ package main
 
 import (
 	img "another-tiny-render/internal/image"
+
 	"math/rand"
 	"time"
 
@@ -70,9 +71,6 @@ func getRandColor() (uint8, uint8, uint8) {
 }
 
 func main() {
-	var (
-		r, g, b uint8
-	)
 
 	// just for random colors, may remove later
 	rand.Seed(time.Now().UnixNano())
@@ -80,34 +78,44 @@ func main() {
 	sdlGlobalState := initSdlGlobalState(512, 512, "sdl")
 	defer destroySdlGlobalState(&sdlGlobalState)
 
-	cnvs, _ := img.BuildCanvas(512, 512, 3)
+	// cnvs, _ := img.BuildCanvas(512, 512, 3)
 
-	cnvs.DrawChecker(32)
-	cnvs.MultPerComponent(0.8, 0.3, 0.1)
+	var cnvs img.SCanvas
+	cnvs.LoadFromJpegFile("../../assets/512x512dude.jpg")
+	// {
+	// var (
+	// r, g, b uint8
+	// )
+	// cnvs.DrawChecker(32)
+	//
+	// r, g, b = getRandColor()
+	// cnvs.SetPenColor(r, g, b)
+	// cnvs.BrasenhamLine(10, 10, 500, 402)
+	//
+	// r, g, b = getRandColor()
+	// cnvs.SetPenColor(r, g, b)
+	// cnvs.BrasenhamLine(400, 20, 40, 350)
+	//
+	// for i := 1; i < 7; i++ {
+	// r, g, b = getRandColor()
+	// cnvs.SetPenColor(r, g, b)
+	// cnvs.BrasenhamCircle(256, 256, i*40)
+	// }
+	//
+	// r, g, b = getRandColor()
+	// cnvs.SetPenColor(r, g, b)
+	// cnvs.DDALine(440, 110, 40, 426)
+	//
+	// }
 
-	r, g, b = getRandColor()
-	cnvs.SetPenColor(r, g, b)
-	cnvs.BrasenhamLine(10, 10, 500, 402)
-
-	r, g, b = getRandColor()
-	cnvs.SetPenColor(r, g, b)
-	cnvs.BrasenhamLine(400, 20, 40, 350)
-
-	for i := 1; i < 7; i++ {
-		r, g, b = getRandColor()
-		cnvs.SetPenColor(r, g, b)
-		cnvs.BrasenhamCircle(256, 256, i*40)
-	}
-
-	r, g, b = getRandColor()
-	cnvs.SetPenColor(r, g, b)
-	cnvs.DDALine(440, 110, 40, 426)
+	blured, _ := img.BuildCanvas(512, 512, 3)
+	img.FastGaussianBlurRGB(cnvs.GetData(), blured.GetData(), 512, 512, 3, 5.0)
 
 	texture, _ := sdlGlobalState.render.CreateTexture(sdl.PIXELFORMAT_RGB24,
-		sdl.TEXTUREACCESS_TARGET, int32(cnvs.GetWidth()), int32(cnvs.GetHeight()))
+		sdl.TEXTUREACCESS_TARGET, int32(blured.GetWidth()), int32(blured.GetHeight()))
 	defer texture.Destroy()
-	rect := sdl.Rect{X: 0, Y: 0, W: int32(cnvs.GetWidth()), H: int32(cnvs.GetHeight())}
-	texture.Update(&rect, cnvs.GetDataPtr(), cnvs.GetWidth()*3)
+	rect := sdl.Rect{X: 0, Y: 0, W: int32(blured.GetWidth()), H: int32(blured.GetHeight())}
+	texture.Update(&rect, blured.GetData(), blured.GetWidth()*3)
 
 	sdlGlobalState.window.UpdateSurface()
 

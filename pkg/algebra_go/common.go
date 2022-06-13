@@ -78,6 +78,7 @@ const (
 const (
 	uvnan    = 0x7FE00000
 	uvinf    = 0x7F800000
+	uvone    = 0x3f800000
 	uvneginf = 0xFF800000
 	mask     = 0xFF
 	shift    = 32 - 8 - 1
@@ -562,4 +563,74 @@ func Sqrtf(x float32) float32 {
 
 func Hypot(a float32, b float32, c float32) float32 {
 	return Sqrtf(a*a + b*b + c*c)
+}
+
+func Round(x float32) float32 {
+	// Round is a faster implementation of:
+	//
+	// func Round(x float64) float64 {
+	//   t := Trunc(x)
+	//   if Abs(x-t) >= 0.5 {
+	//     return t + Copysign(1, x)
+	//   }
+	//   return t
+	// }
+	bits := float32bits(x)
+	e := uint(bits>>shift) & mask
+	if e < bias {
+		// Round abs(x) < 1 including denormals.
+		bits &= signMask // +-0
+		if e == bias-1 {
+			bits |= uvone // +-1
+		}
+	} else if e < bias+shift {
+		// Round any abs(x) >= 1 containing a fractional component [0,1).
+		//
+		// Numbers with larger exponents are returned unchanged since they
+		// must be either an integer, infinity, or NaN.
+		const half = 1 << (shift - 1)
+		e -= bias
+		bits += half >> e
+		bits &^= fracMask >> e
+	}
+	return float32frombits(bits)
+}
+
+func Modf(f float32) (int float32, frac float32) {
+	if f < 1 {
+		switch {
+		case f < 0:
+			int, frac = Modf(-f)
+			return -int, -frac
+		case f == 0:
+			return f, f // Return -0, -0 when f == -0
+		}
+		return 0, f
+	}
+
+	x := float32bits(f)
+	e := uint(x>>shift)&mask - bias
+
+	// Keep the top 9+e bits, the integer part; clear the rest.
+	if e < 32-9 {
+		x &^= 1<<(32-9-e) - 1
+	}
+	int = float32frombits(x)
+	frac = f - int
+	return
+}
+
+func Floor(x float32) float32 {
+	if x == 0 || isNaN(x) || isInf(x, 0) {
+		return x
+	}
+	if x < 0 {
+		d, fract := Modf(-x)
+		if fract != 0.0 {
+			d = d + 1
+		}
+		return -d
+	}
+	d, _ := Modf(x)
+	return d
 }

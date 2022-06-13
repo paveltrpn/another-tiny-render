@@ -2,6 +2,7 @@ package image
 
 import (
 	alg "another-tiny-render/pkg/algebra_go"
+	fgblur "another-tiny-render/pkg/fast_gauss_blur"
 	"math"
 )
 
@@ -57,6 +58,40 @@ func (cnvs *SCanvas) MultPerComponent(fR, fG, fB float32) {
 // kernel numbers.
 func (cnvs *SCanvas) MultByKernel(krnl []float32) {
 
+}
+
+func (cnvs SCanvas) ExtractSurround5by5(pixId int) *[25]int {
+	const (
+		krnlSize     = 5
+		halfKrnlSize = krnlSize / 2
+	)
+
+	var (
+		r, c, i  int
+		row, cmn int
+	)
+
+	rows := cnvs.height
+
+	rt := new([krnlSize * krnlSize]int)
+
+	rowById := pixId / rows
+	cmnById := pixId - rowById*rows
+
+	for r = -halfKrnlSize; r < halfKrnlSize+1; r++ {
+		for c = -halfKrnlSize; c < halfKrnlSize+1; c++ {
+			row = rowById + r
+			cmn = cmnById + c
+			if (row < 0) || (cmn < 0) {
+				rt[i] = -1
+			} else {
+				rt[i] = row*rows + cmn
+			}
+			i++
+		}
+	}
+
+	return rt
 }
 
 func ExtractSurround(pixId int32) *[25]int32 {
@@ -123,4 +158,8 @@ func genGausFilterKernel() [5][5]float32 {
 	}
 
 	return kernel
+}
+
+func FastGaussianBlurRGB(in []uint8, out []uint8, w int, h int, c int, sigma float32) {
+	fgblur.Fast_gaussian_blur_rgb(in, out, w, h, c, sigma)
 }

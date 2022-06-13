@@ -2,6 +2,7 @@ package image
 
 import (
 	"errors"
+	"unsafe"
 )
 
 const (
@@ -40,7 +41,24 @@ func BuildCanvas(xs, ys, bpp int) (SCanvas, error) {
 		pen_color: [...]uint8{255, 255, 255}}, nil
 }
 
-func (cnvs SCanvas) GetDataPtr() []uint8 {
+// Directly cast pointer to first element of data slice
+// to unsafe.Pointer to avoid of calling gl.Ptr() function
+// which involves some runtime type reflection operations.
+// It works because i'm sure that &cnvs.data[0] is
+// allways addressable.
+// Not very safe, indeed.
+func (cnvs SCanvas) GetDataUnsafePtr() unsafe.Pointer {
+	return unsafe.Pointer(&cnvs.data[0])
+}
+
+// Simple return of pointer to first element of data slice
+// to pass they to gl.Ptr() function in further.
+// More safe way.
+func (cnvs SCanvas) GetDataPtr() *uint8 {
+	return &cnvs.data[0]
+}
+
+func (cnvs SCanvas) GetData() []uint8 {
 	return cnvs.data
 }
 
