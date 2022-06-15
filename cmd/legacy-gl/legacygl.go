@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 	"os"
 	"runtime"
 
@@ -72,14 +71,6 @@ func RegisterGlfwCallbacks() {
 func main() {
 	runtime.LockOSThread()
 
-	// Test kernel multiplication
-	{
-		foo := img.ExtractSurround(2)
-		for _, i := range foo {
-			println(i)
-		}
-	}
-
 	InitGlfwWindow()
 	SetOglDefaults()
 	RegisterGlfwCallbacks()
@@ -102,41 +93,43 @@ func main() {
 	gl.PointSize(13.0)
 
 	var tex uint32
-	texFile, _ := img.BuildCanvas(512, 512, 3)
-	// texFile.LoadFromJpegFile("diffuse.jpg")
-	texFile.DrawChecker(16)
-
-	{
-		var (
-			r, g, b uint8
-		)
-
-		getRandColor := func() (uint8, uint8, uint8) {
-			return uint8(rand.Intn(255)),
-				uint8(rand.Intn(255)),
-				uint8(rand.Intn(255))
-		}
-
-		texFile.MultPerComponent(0.8, 1.8, 0.1)
-
-		r, g, b = getRandColor()
-		texFile.SetPenColor(r, g, b)
-		texFile.BrasenhamLine(10, 10, 500, 402)
-
-		r, g, b = getRandColor()
-		texFile.SetPenColor(r, g, b)
-		texFile.BrasenhamLine(400, 20, 40, 350)
-
-		for i := 1; i < 32; i++ {
-			r, g, b = getRandColor()
-			texFile.SetPenColor(r, g, b)
-			texFile.BrasenhamCircle(256, 256, i*15)
-		}
-
-		r, g, b = getRandColor()
-		texFile.SetPenColor(r, g, b)
-		texFile.DDALine(440, 110, 40, 426)
+	texFile, err := img.BuildCanvasFromFile("../../assets/demon_baby/diffuse.png")
+	if err != nil {
+		fmt.Println(err)
 	}
+	// texFile.DrawChecker(16)
+
+	// {
+	// var (
+	// r, g, b uint8
+	// )
+	//
+	// getRandColor := func() (uint8, uint8, uint8) {
+	// return uint8(rand.Intn(255)),
+	// uint8(rand.Intn(255)),
+	// uint8(rand.Intn(255))
+	// }
+	//
+	// texFile.MultPerComponent(0.8, 1.8, 0.1)
+	//
+	// r, g, b = getRandColor()
+	// texFile.SetPenColor(r, g, b)
+	// texFile.BrasenhamLine(10, 10, 500, 402)
+	//
+	// r, g, b = getRandColor()
+	// texFile.SetPenColor(r, g, b)
+	// texFile.BrasenhamLine(400, 20, 40, 350)
+	//
+	// for i := 1; i < 32; i++ {
+	// r, g, b = getRandColor()
+	// texFile.SetPenColor(r, g, b)
+	// texFile.BrasenhamCircle(256, 256, i*15)
+	// }
+	//
+	// r, g, b = getRandColor()
+	// texFile.SetPenColor(r, g, b)
+	// texFile.DDALine(440, 110, 40, 426)
+	// }
 
 	gl.Enable(gl.TEXTURE_2D)
 	gl.GenTextures(1, &tex)

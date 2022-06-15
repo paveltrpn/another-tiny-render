@@ -78,10 +78,7 @@ func main() {
 	sdlGlobalState := initSdlGlobalState(512, 512, "sdl")
 	defer destroySdlGlobalState(&sdlGlobalState)
 
-	// cnvs, _ := img.BuildCanvas(512, 512, 3)
-
-	var cnvs img.SCanvas
-	cnvs.LoadFromJpegFile("../../assets/512x512dude.jpg")
+	cnvs, _ := img.BuildCanvasFromFile("../../assets/512x512dude.jpg")
 	// {
 	// var (
 	// r, g, b uint8
@@ -108,8 +105,8 @@ func main() {
 	//
 	// }
 
-	blured, _ := img.BuildCanvas(512, 512, 3)
-	img.FastGaussianBlurRGB(cnvs.GetData(), blured.GetData(), 512, 512, 3, 5.0)
+	blured, _ := img.BuildEmptyCanvas(512, 512, 3)
+	img.FastGaussianBlurRGB(cnvs.GetData(), blured.GetData(), 512, 512, 3, 8)
 
 	texture, _ := sdlGlobalState.render.CreateTexture(sdl.PIXELFORMAT_RGB24,
 		sdl.TEXTUREACCESS_TARGET, int32(blured.GetWidth()), int32(blured.GetHeight()))

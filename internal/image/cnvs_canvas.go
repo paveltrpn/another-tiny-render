@@ -22,19 +22,21 @@ type SCanvas struct {
 	pen_color [3]uint8
 }
 
-func BuildCanvas(xs, ys, bpp int) (SCanvas, error) {
+func buildNilCanvas() SCanvas {
+	return SCanvas{data: nil,
+		width:  0,
+		height: 0,
+		depth:  0}
+}
+
+func BuildEmptyCanvas(xs, ys, bpp int) (SCanvas, error) {
 	// check only depth parameter,
 	// maybe check canvas size bounds?
 	if (bpp < 3) || (bpp > 4) {
-		return SCanvas{data: nil,
-			width:  0,
-			height: 0,
-			depth:  0}, errors.New("BuildCanvas(): Error! Wrong canvas pixel depth value")
+		return buildNilCanvas(), errors.New("BuildCanvas(): Error! Wrong canvas pixel depth value")
 	}
 
-	byteArray := make([]uint8, xs*ys*bpp)
-
-	return SCanvas{data: byteArray,
+	return SCanvas{data: make([]uint8, xs*ys*bpp),
 		width:     xs,
 		height:    ys,
 		depth:     bpp,

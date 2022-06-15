@@ -4,6 +4,23 @@ import (
 	alg "another-tiny-render/pkg/algebra_go"
 )
 
+// Golang interpretation of fast Gaussian blur algorithm by Ivan Kutskir.
+// Original code was writen in C++. I keep author function naming style, all
+// comments and functions descriptions. I only add one exported function - Fast_gaussian_blur_rgb()
+// for interface purpose to another part of module.
+//!
+//! \file blur.cpp
+//! \author Basile Fraboni
+//! \date 2017
+//!
+//! \brief The software is a C++ implementation of a fast
+//! Gaussian blur algorithm by Ivan Kutskir. For further details
+//! please refer to :
+//! http://blog.ivank.net/fastest-gaussian-blur.html
+//!
+//! Unsigned char version
+//!
+
 //!
 //! \fn void std_to_box(float boxes[], float sigma, int n)
 //!
@@ -56,9 +73,9 @@ func horizontal_blur_rgb(in []uint8, out []uint8, w, h, c, r int) {
 		var li int = ti
 		var ri int = ti + r
 
-		var fv = [3]uint8{in[ti*c+0], in[ti*c+1], in[ti*c+2]}
-		var lv = [3]uint8{in[(ti+w-1)*c+0], in[(ti+w-1)*c+1], in[(ti+w-1)*c+2]}
-		var val = [3]int{(r + 1) * int(fv[0]), (r + 1) * int(fv[1]), (r + 1) * int(fv[2])}
+		var fv = [3]int{int(in[ti*c+0]), int(in[ti*c+1]), int(in[ti*c+2])}
+		var lv = [3]int{int(in[(ti+w-1)*c+0]), int(in[(ti+w-1)*c+1]), int(in[(ti+w-1)*c+2])}
+		var val = [3]int{(r + 1) * fv[0], (r + 1) * fv[1], (r + 1) * fv[2]}
 
 		for j := 0; j < r; j++ {
 			val[0] += int(in[(ti+j)*c+0])
@@ -67,27 +84,27 @@ func horizontal_blur_rgb(in []uint8, out []uint8, w, h, c, r int) {
 		}
 
 		for j := 0; j <= r; j, ri, ti = j+1, ri+1, ti+1 {
-			val[0] += int(in[ri*c+0] - fv[0])
-			val[1] += int(in[ri*c+1] - fv[1])
-			val[2] += int(in[ri*c+2] - fv[2])
+			val[0] += int(in[ri*c+0]) - fv[0]
+			val[1] += int(in[ri*c+1]) - fv[1]
+			val[2] += int(in[ri*c+2]) - fv[2]
 			out[ti*c+0] = uint8(alg.Round(float32(val[0]) * iarr))
 			out[ti*c+1] = uint8(alg.Round(float32(val[1]) * iarr))
 			out[ti*c+2] = uint8(alg.Round(float32(val[2]) * iarr))
 		}
 
 		for j := r + 1; j < w-r; j, ri, ti, li = j+1, ri+1, ti+1, li+1 {
-			val[0] += int(in[ri*c+0] - in[li*c+0])
-			val[1] += int(in[ri*c+1] - in[li*c+1])
-			val[2] += int(in[ri*c+2] - in[li*c+2])
+			val[0] += int(in[ri*c+0]) - int(in[li*c+0])
+			val[1] += int(in[ri*c+1]) - int(in[li*c+1])
+			val[2] += int(in[ri*c+2]) - int(in[li*c+2])
 			out[ti*c+0] = uint8(alg.Round(float32(val[0]) * iarr))
 			out[ti*c+1] = uint8(alg.Round(float32(val[1]) * iarr))
 			out[ti*c+2] = uint8(alg.Round(float32(val[2]) * iarr))
 		}
 
 		for j := w - r; j < w; j, ti, li = j+1, ti+1, li+1 {
-			val[0] += int(lv[0] - in[li*c+0])
-			val[1] += int(lv[1] - in[li*c+1])
-			val[2] += int(lv[2] - in[li*c+2])
+			val[0] += lv[0] - int(in[li*c+0])
+			val[1] += lv[1] - int(in[li*c+1])
+			val[2] += lv[2] - int(in[li*c+2])
 			out[ti*c+0] = uint8(alg.Round(float32(val[0]) * iarr))
 			out[ti*c+1] = uint8(alg.Round(float32(val[1]) * iarr))
 			out[ti*c+2] = uint8(alg.Round(float32(val[2]) * iarr))
@@ -115,9 +132,9 @@ func total_blur_rgb(in []uint8, out []uint8, w, h, c, r int) {
 		var li int = ti
 		var ri int = ti + r*w
 
-		var fv = [3]uint8{in[ti*c+0], in[ti*c+1], in[ti*c+2]}
-		var lv = [3]uint8{in[(ti+w*(h-1))*c+0], in[(ti+w*(h-1))*c+1], in[(ti+w*(h-1))*c+2]}
-		var val = [3]int{(r + 1) * int(fv[0]), (r + 1) * int(fv[1]), (r + 1) * int(fv[2])}
+		var fv = [3]int{int(in[ti*c+0]), int(in[ti*c+1]), int(in[ti*c+2])}
+		var lv = [3]int{int(in[(ti+w*(h-1))*c+0]), int(in[(ti+w*(h-1))*c+1]), int(in[(ti+w*(h-1))*c+2])}
+		var val = [3]int{(r + 1) * fv[0], (r + 1) * fv[1], (r + 1) * fv[2]}
 
 		for j := 0; j < r; j++ {
 			val[0] += int(in[(ti+j*w)*c+0])
@@ -126,27 +143,27 @@ func total_blur_rgb(in []uint8, out []uint8, w, h, c, r int) {
 		}
 
 		for j := 0; j <= r; j, ri, ti = j+1, ri+w, ti+w {
-			val[0] += int(in[ri*c+0] - fv[0])
-			val[1] += int(in[ri*c+1] - fv[1])
-			val[2] += int(in[ri*c+2] - fv[2])
+			val[0] += int(in[ri*c+0]) - fv[0]
+			val[1] += int(in[ri*c+1]) - fv[1]
+			val[2] += int(in[ri*c+2]) - fv[2]
 			out[ti*c+0] = uint8(alg.Round(float32(val[0]) * iarr))
 			out[ti*c+1] = uint8(alg.Round(float32(val[1]) * iarr))
 			out[ti*c+2] = uint8(alg.Round(float32(val[2]) * iarr))
 		}
 
 		for j := r + 1; j < h-r; j, ri, ti, li = j+1, ri+w, ti+w, li+w {
-			val[0] += int(in[ri*c+0] - in[li*c+0])
-			val[1] += int(in[ri*c+1] - in[li*c+1])
-			val[2] += int(in[ri*c+2] - in[li*c+2])
+			val[0] += int(in[ri*c+0]) - int(in[li*c+0])
+			val[1] += int(in[ri*c+1]) - int(in[li*c+1])
+			val[2] += int(in[ri*c+2]) - int(in[li*c+2])
 			out[ti*c+0] = uint8(alg.Round(float32(val[0]) * iarr))
 			out[ti*c+1] = uint8(alg.Round(float32(val[1]) * iarr))
 			out[ti*c+2] = uint8(alg.Round(float32(val[2]) * iarr))
 		}
 
 		for j := h - r; j < h; j, ti, li = j+1, ti+w, li+w {
-			val[0] += int(lv[0] - in[li*c+0])
-			val[1] += int(lv[1] - in[li*c+1])
-			val[2] += int(lv[2] - in[li*c+2])
+			val[0] += lv[0] - int(in[li*c+0])
+			val[1] += lv[1] - int(in[li*c+1])
+			val[2] += lv[2] - int(in[li*c+2])
 			out[ti*c+0] = uint8(alg.Round(float32(val[0]) * iarr))
 			out[ti*c+1] = uint8(alg.Round(float32(val[1]) * iarr))
 			out[ti*c+2] = uint8(alg.Round(float32(val[2]) * iarr))

@@ -1,24 +1,46 @@
 package image
 
 import (
+	"fmt"
+	"image"
 	"image/color"
 	"image/jpeg"
+	"image/png"
 	"os"
+	"path/filepath"
 )
 
-func (cnvs *SCanvas) LoadFromJpegFile(fname string) {
-	// Load image file as image.Image interface
+func BuildCanvasFromFile(fname string) (SCanvas, error) {
 	imagefile, err := os.Open(fname)
 	if err != nil {
-		println(err)
-		panic(0)
+		return buildNilCanvas(), err
 	}
 	defer imagefile.Close()
 
-	imageData, err := jpeg.Decode(imagefile)
-	if err != nil {
-		println(err)
-		panic(0)
+	var (
+		model     color.Model
+		imageData image.Image
+		cnvs      SCanvas
+		idx       int
+	)
+
+	suffix := filepath.Ext(fname)
+
+	switch suffix {
+	case ".jpg":
+		imageData, err = jpeg.Decode(imagefile)
+		if err != nil {
+			return buildNilCanvas(), err
+		}
+		model = color.NRGBAModel
+	case ".png":
+		imageData, err = png.Decode(imagefile)
+		if err != nil {
+			return buildNilCanvas(), err
+		}
+		model = color.RGBAModel
+	default:
+		return buildNilCanvas(), fmt.Errorf("BuildCanvasFromFile(): Error! Wrong file type with file - %v", fname)
 	}
 
 	// Convert image.Image interface to []uint8 rgb slice
@@ -30,16 +52,17 @@ func (cnvs *SCanvas) LoadFromJpegFile(fname string) {
 
 	cnvs.data = make([]uint8, cnvs.width*cnvs.height*3)
 
-	idx := 0
 	for y := sz.Min.Y; y < sz.Max.Y; y++ {
 		for x := sz.Min.X; x < sz.Max.X; x++ {
 			rgba := imageData.At(x, y)
 			// Convert an alpha-premultiplied colors to non-alpha-premultiplied 32-bit color
-			nrgba := color.Model.Convert(color.NRGBAModel, rgba)
+			nrgba := model.Convert(rgba)
 			r, g, b, _ := nrgba.RGBA()
 
 			cnvs.data[idx], cnvs.data[idx+1], cnvs.data[idx+2] = uint8(r), uint8(g), uint8(b)
 			idx += 3
 		}
 	}
+
+	return cnvs, nil
 }
