@@ -11,9 +11,9 @@ func (cnvs SCanvas) PutPixel(x, y int) {
 		return
 	}
 
-	cnvs.data[((x*cnvs.depth)*cnvs.height+y*cnvs.depth)+0] = cnvs.pen_color[0]
-	cnvs.data[((x*cnvs.depth)*cnvs.height+y*cnvs.depth)+1] = cnvs.pen_color[1]
-	cnvs.data[((x*cnvs.depth)*cnvs.height+y*cnvs.depth)+2] = cnvs.pen_color[2]
+	cnvs.data[((x*4)*cnvs.height+y*4)+0] = cnvs.pen_color[0]
+	cnvs.data[((x*4)*cnvs.height+y*4)+1] = cnvs.pen_color[1]
+	cnvs.data[((x*4)*cnvs.height+y*4)+2] = cnvs.pen_color[2]
 }
 
 // Fill square sector of canvas with given color.

@@ -7,75 +7,29 @@ import (
 
 	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/inkyblackness/imgui-go/v4"
 
 	gmtry "another-tiny-render/internal/geometry"
 	img "another-tiny-render/internal/image"
+	srv "another-tiny-render/internal/service"
 	alg "another-tiny-render/pkg/algebra_go"
 )
-
-var (
-	GlfwWndPtr *glfw.Window
-	WndWidth   int = 1280
-	WndHeight  int = 720
-
-	Aspect = float32(WndWidth) / float32(WndHeight)
-)
-
-func InitGlfwWindow() {
-	if err := glfw.Init(); err != nil {
-		fmt.Println("InitGlfwWindow(): Error! Can't init glfw!")
-		panic(err)
-	}
-
-	glfw.WindowHint(glfw.ContextVersionMajor, 2)
-	glfw.WindowHint(glfw.ContextVersionMinor, 1)
-	glfw.WindowHint(glfw.Resizable, glfw.False)
-	glfw.WindowHint(glfw.DoubleBuffer, glfw.True)
-	glfw.WindowHint(glfw.Samples, 4)
-
-	wnd, err := glfw.CreateWindow(WndWidth, WndHeight, "legacy-gl", nil, nil)
-	if err != nil {
-		panic(err)
-	}
-	GlfwWndPtr = wnd
-
-	GlfwWndPtr.MakeContextCurrent()
-	glfw.SwapInterval(1)
-
-	if err := gl.Init(); err != nil {
-		fmt.Println("InitGlfwWindow(): Error! Can't init OpenGl!")
-		panic(err)
-	}
-}
-
-func SetOglDefaults() {
-	gl.Viewport(0, 0, int32(WndWidth), int32(WndHeight))
-	gl.ClearColor(0.1, 0.1, 0.1, 1.0)
-
-	gl.Enable(gl.MULTISAMPLE)
-
-	gl.Enable(gl.DEPTH_TEST)
-	gl.DepthFunc(gl.LESS)
-}
-
-func RegisterGlfwCallbacks() {
-	keyCallback := func(w *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
-		if key == glfw.KeyEscape {
-			w.SetShouldClose(true)
-		}
-	}
-
-	GlfwWndPtr.SetKeyCallback(keyCallback)
-}
 
 func main() {
 	runtime.LockOSThread()
 
-	InitGlfwWindow()
-	SetOglDefaults()
-	RegisterGlfwCallbacks()
+	appState := srv.SAppState{WndWidth: 1152,
+		WndHeight: 768,
+		AppName:   "legacygl",
+		Aspect:    1152.0 / 768.0}
 
-	prspMtrx := alg.Mtrx4FromPerspective(alg.DegToRad(45.0), Aspect, 0.01, 100.0)
+	appState.InitGlfwWindowLegacy()
+	appState.SetOglDefaults()
+	appState.RegisterGlfwCallbacks()
+	appState.InitImGUI()
+	defer appState.DestroyImGUI()
+
+	prspMtrx := alg.Mtrx4FromPerspective(alg.DegToRad(45.0), appState.Aspect, 0.01, 100.0)
 	mdlMtrx := alg.Mtrx4FromLookAt(alg.Vec3{5.0, 3.0, 45.0}, alg.Vec3{0.0, -7.0, 0.0}, alg.Vec3{0.0, 1.0, 0.0})
 	rtn := alg.Mtrx4FromAxisAngl(alg.Vec3{0.0, 1.0, 0.0}, alg.DegToRad(0.5))
 
@@ -131,14 +85,19 @@ func main() {
 	// texFile.DDALine(440, 110, 40, 426)
 	// }
 
+	gl.Enable(gl.MULTISAMPLE)
+
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.LESS)
+
 	gl.Enable(gl.TEXTURE_2D)
 	gl.GenTextures(1, &tex)
 	gl.BindTexture(gl.TEXTURE_2D, tex)
-	gl.TexImage2D(gl.TEXTURE_2D, 0, int32(texFile.GetDepth()),
+	gl.TexImage2D(gl.TEXTURE_2D, 0, 4,
 		int32(texFile.GetWidth()),
 		int32(texFile.GetHeight()),
 		0,
-		gl.RGB,
+		gl.RGBA,
 		gl.UNSIGNED_BYTE,
 		texFile.GetDataUnsafePtr())
 
@@ -159,7 +118,7 @@ func main() {
 	gl.Lightfv(gl.LIGHT0, gl.DIFFUSE, &l1Diffuse[0])
 	gl.Lightfv(gl.LIGHT0, gl.POSITION, &l1Pos[0])
 
-	for !GlfwWndPtr.ShouldClose() {
+	for !appState.GlfwWndPtr.ShouldClose() {
 		glfw.PollEvents()
 
 		foo.TransformVerticesMtrx4(rtn)
@@ -205,6 +164,25 @@ func main() {
 
 		gl.Disable(gl.LIGHTING)
 
-		GlfwWndPtr.SwapBuffers()
+		// -----------------------------------------------------------
+		// Draw GUI
+		// -----------------------------------------------------------
+
+		appState.ImguiNewFrame()
+		imgui.NewFrame()
+		{
+			imgui.Begin(appState.AppName)
+			fpsString := fmt.Sprintf("Frame time")
+			imgui.Text(fpsString)
+
+			imgui.End()
+		}
+		appState.RenderImGUI()
+
+		// -----------------------------------------------------------
+		// -----------------------------------------------------------
+		// -----------------------------------------------------------
+
+		appState.GlfwWndPtr.SwapBuffers()
 	}
 }

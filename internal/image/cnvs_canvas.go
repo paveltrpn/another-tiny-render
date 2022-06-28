@@ -1,7 +1,6 @@
 package image
 
 import (
-	"errors"
 	"unsafe"
 )
 
@@ -10,36 +9,35 @@ const (
 	CNVS_RGBA = 4
 )
 
-type SCanvas struct {
+type SRGBABitmap struct {
 	data   []uint8
 	width  int
 	height int
+}
 
-	depth int
+type SCanvas struct {
+	SRGBABitmap
 
 	// color components that used for PutPixel()
 	// "pen" color, default - white defined in BuildCanvas()
 	pen_color [3]uint8
 }
 
-func buildNilCanvas() SCanvas {
-	return SCanvas{data: nil,
-		width:  0,
-		height: 0,
-		depth:  0}
+type SRGBA struct {
+	r, g, b, a uint8
 }
 
-func BuildEmptyCanvas(xs, ys, bpp int) (SCanvas, error) {
-	// check only depth parameter,
-	// maybe check canvas size bounds?
-	if (bpp < 3) || (bpp > 4) {
-		return buildNilCanvas(), errors.New("BuildCanvas(): Error! Wrong canvas pixel depth value")
-	}
+func buildNilCanvas() SCanvas {
+	return SCanvas{SRGBABitmap: SRGBABitmap{data: nil,
+		width:  0,
+		height: 0},
+		pen_color: [...]uint8{255, 255, 255}}
+}
 
-	return SCanvas{data: make([]uint8, xs*ys*bpp),
-		width:     xs,
-		height:    ys,
-		depth:     bpp,
+func BuildEmptyCanvas(xs, ys int) (SCanvas, error) {
+	return SCanvas{SRGBABitmap: SRGBABitmap{data: make([]uint8, xs*ys*4),
+		width:  xs,
+		height: ys},
 		pen_color: [...]uint8{255, 255, 255}}, nil
 }
 
@@ -72,10 +70,6 @@ func (cnvs SCanvas) GetHeight() int {
 	return cnvs.height
 }
 
-func (cnvs SCanvas) GetDepth() int {
-	return cnvs.depth
-}
-
 func (cnvs *SCanvas) SetPenColor(r, g, b uint8) {
 	cnvs.pen_color[0] = r
 	cnvs.pen_color[1] = b
@@ -83,7 +77,7 @@ func (cnvs *SCanvas) SetPenColor(r, g, b uint8) {
 }
 
 func (cnvs *SCanvas) getPixelIndex(row, col int) int {
-	return (row*cnvs.depth)*cnvs.height + col*cnvs.depth
+	return (row*4)*cnvs.height + col*4
 }
 
 func (cnvs *SCanvas) getPixelRVal(row, col int) uint8 {

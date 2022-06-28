@@ -105,14 +105,14 @@ func main() {
 	//
 	// }
 
-	blured, _ := img.BuildEmptyCanvas(512, 512, 3)
-	img.FastGaussianBlurRGB(cnvs.GetData(), blured.GetData(), 512, 512, 3, 8)
+	// blured, _ := img.BuildEmptyCanvas(512, 512)
+	// img.FastGaussianBlurRGB(cnvs.GetData(), blured.GetData(), 512, 512, 3, 8)
 
-	texture, _ := sdlGlobalState.render.CreateTexture(sdl.PIXELFORMAT_RGB24,
-		sdl.TEXTUREACCESS_TARGET, int32(blured.GetWidth()), int32(blured.GetHeight()))
+	texture, _ := sdlGlobalState.render.CreateTexture(sdl.PIXELFORMAT_ABGR8888,
+		sdl.TEXTUREACCESS_TARGET, int32(cnvs.GetWidth()), int32(cnvs.GetHeight()))
 	defer texture.Destroy()
-	rect := sdl.Rect{X: 0, Y: 0, W: int32(blured.GetWidth()), H: int32(blured.GetHeight())}
-	texture.Update(&rect, blured.GetData(), blured.GetWidth()*3)
+	rect := sdl.Rect{X: 0, Y: 0, W: int32(cnvs.GetWidth()), H: int32(cnvs.GetHeight())}
+	texture.Update(&rect, cnvs.GetData(), cnvs.GetWidth()*4)
 
 	sdlGlobalState.window.UpdateSurface()
 

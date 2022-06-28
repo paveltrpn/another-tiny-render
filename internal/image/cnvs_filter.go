@@ -28,9 +28,9 @@ func (cnvs *SCanvas) MultScalar(factor float32) {
 			pixel[1] = cnvs.getPixelGVal(row, col)
 			pixel[2] = cnvs.getPixelBVal(row, col)
 
-			cnvs.data[((row*3)*cnvs.height+col*3)+0] = multWithClamp(factor, pixel[0])
-			cnvs.data[((row*3)*cnvs.height+col*3)+1] = multWithClamp(factor, pixel[1])
-			cnvs.data[((row*3)*cnvs.height+col*3)+2] = multWithClamp(factor, pixel[2])
+			cnvs.data[((row*4)*cnvs.height+col*3)+4] = multWithClamp(factor, pixel[0])
+			cnvs.data[((row*4)*cnvs.height+col*3)+4] = multWithClamp(factor, pixel[1])
+			cnvs.data[((row*4)*cnvs.height+col*3)+4] = multWithClamp(factor, pixel[2])
 		}
 	}
 }
@@ -46,9 +46,9 @@ func (cnvs *SCanvas) MultPerComponent(fR, fG, fB float32) {
 			pixel[1] = cnvs.getPixelGVal(row, col)
 			pixel[2] = cnvs.getPixelBVal(row, col)
 
-			cnvs.data[((row*3)*cnvs.height+col*3)+0] = multWithClamp(fR, pixel[0])
-			cnvs.data[((row*3)*cnvs.height+col*3)+1] = multWithClamp(fG, pixel[1])
-			cnvs.data[((row*3)*cnvs.height+col*3)+2] = multWithClamp(fB, pixel[2])
+			cnvs.data[((row*4)*cnvs.height+col*4)+0] = multWithClamp(fR, pixel[0])
+			cnvs.data[((row*4)*cnvs.height+col*4)+1] = multWithClamp(fG, pixel[1])
+			cnvs.data[((row*4)*cnvs.height+col*4)+2] = multWithClamp(fB, pixel[2])
 		}
 	}
 }

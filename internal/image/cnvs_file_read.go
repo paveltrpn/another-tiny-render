@@ -43,24 +43,23 @@ func BuildCanvasFromFile(fname string) (SCanvas, error) {
 		return buildNilCanvas(), fmt.Errorf("BuildCanvasFromFile(): Error! Wrong file type with file - %v", fname)
 	}
 
-	// Convert image.Image interface to []uint8 rgb slice
+	// Convert image.Image interface to []uint8 rgba slice
 	sz := imageData.Bounds()
 
 	cnvs.width = sz.Max.X - sz.Min.X
 	cnvs.height = sz.Max.Y - sz.Min.Y
-	cnvs.depth = 3
 
-	cnvs.data = make([]uint8, cnvs.width*cnvs.height*3)
+	cnvs.data = make([]uint8, cnvs.width*cnvs.height*4)
 
 	for y := sz.Min.Y; y < sz.Max.Y; y++ {
 		for x := sz.Min.X; x < sz.Max.X; x++ {
 			rgba := imageData.At(x, y)
 			// Convert an alpha-premultiplied colors to non-alpha-premultiplied 32-bit color
 			nrgba := model.Convert(rgba)
-			r, g, b, _ := nrgba.RGBA()
+			r, g, b, a := nrgba.RGBA()
 
-			cnvs.data[idx], cnvs.data[idx+1], cnvs.data[idx+2] = uint8(r), uint8(g), uint8(b)
-			idx += 3
+			cnvs.data[idx], cnvs.data[idx+1], cnvs.data[idx+2], cnvs.data[idx+3] = uint8(r), uint8(g), uint8(b), uint8(a)
+			idx += 4
 		}
 	}
 
