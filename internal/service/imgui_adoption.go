@@ -58,9 +58,10 @@ func (state *SAppState) InitImGUI() {
 	state.imGUIcontext = imgui.CreateContext(nil)
 	state.imGUIio = imgui.CurrentIO()
 
-	if state.oglContextType == OGlContextLegacy {
+	switch state.oglContextType {
+	case oglContextLegacy:
 		state.imGUIrenderer, _ = NewOpenGL2(state.imGUIio)
-	} else if state.oglContextType == OGlContextModern {
+	case oglContextModern:
 		state.imGUIrenderer, _ = NewOpenGL3(state.imGUIio)
 	}
 }

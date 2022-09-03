@@ -57,7 +57,7 @@ func main() {
 	// var (
 	// r, g, b uint8
 	// )
-	//
+
 	// getRandColor := func() (uint8, uint8, uint8) {
 	// return uint8(rand.Intn(255)),
 	// uint8(rand.Intn(255)),
@@ -172,7 +172,7 @@ func main() {
 		imgui.NewFrame()
 		{
 			imgui.Begin(appState.AppName)
-			fpsString := fmt.Sprintf("Frame time")
+			fpsString := "Frame time"
 			imgui.Text(fpsString)
 
 			imgui.End()

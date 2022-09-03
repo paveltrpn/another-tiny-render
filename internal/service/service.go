@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	OGlContextLegacy = iota
-	OGlContextModern
+	oglContextLegacy = iota
+	oglContextModern
 )
 
 type SAppState struct {
@@ -22,19 +22,16 @@ type SAppState struct {
 
 	oglContextType int
 
+	// contains global global ImGUI related fields
+	// related to current OpenGL context
 	SImGUIState
 
-	GlfwVersionStr string
-	GlRenderStr    string
-	GlVersionStr   string
-	GlslVersionStr string
-}
-
-func (state *SAppState) Print() {
-	fmt.Println(state.GlRenderStr)
-	fmt.Println(state.GlVersionStr)
-	fmt.Println(state.GlslVersionStr)
-	fmt.Println(state.GlfwVersionStr)
+	// contains info strings about GLFW and OpenGL contexts
+	// [0] - GLFW version string
+	// [1] - OpenGL render string
+	// [2] - OpenGL version string
+	// [3] - OpenGL GLSL version string
+	contextInfo [4]string
 }
 
 func (state *SAppState) RegisterGlfwCallbacks() {
@@ -70,23 +67,23 @@ func (state *SAppState) InitGlfwWindowModern() {
 	glfw.SwapInterval(1)
 
 	major, minor, rev := glfw.GetVersion()
-	state.GlfwVersionStr = fmt.Sprintf("%d.%d.%d", major, minor, rev)
+	state.contextInfo[0] = fmt.Sprintf("%d.%d.%d", major, minor, rev)
 
 	if err := gl.Init(); err != nil {
-		fmt.Println("InitGlfwWindow(): Error! Can't init OpenGl!")
+		fmt.Println("InitGlfwWindowModern(): Error! Can't init OpenGl!")
 		panic(err)
 	}
 
-	state.GlRenderStr = gl.GoStr(gl.GetString(gl.RENDERER))
-	state.GlVersionStr = gl.GoStr(gl.GetString(gl.VERSION))
-	state.GlslVersionStr = gl.GoStr(gl.GetString(gl.SHADING_LANGUAGE_VERSION))
+	state.contextInfo[1] = gl.GoStr(gl.GetString(gl.RENDERER))
+	state.contextInfo[2] = gl.GoStr(gl.GetString(gl.VERSION))
+	state.contextInfo[3] = gl.GoStr(gl.GetString(gl.SHADING_LANGUAGE_VERSION))
 
-	state.oglContextType = OGlContextModern
+	state.oglContextType = oglContextModern
 }
 
 func (state *SAppState) InitGlfwWindowLegacy() {
 	if err := glfw.Init(); err != nil {
-		fmt.Println("InitGlfwWindow(): Error! Can't init glfw!")
+		fmt.Println("InitGlfwWindowLegacy(): Error! Can't init glfw!")
 		panic(err)
 	}
 
@@ -105,12 +102,19 @@ func (state *SAppState) InitGlfwWindowLegacy() {
 	state.GlfwWndPtr.MakeContextCurrent()
 	glfw.SwapInterval(1)
 
+	major, minor, rev := glfw.GetVersion()
+	state.contextInfo[0] = fmt.Sprintf("%d.%d.%d", major, minor, rev)
+
 	if err := gl.Init(); err != nil {
-		fmt.Println("InitGlfwWindow(): Error! Can't init OpenGl!")
+		fmt.Println("InitGlfwWindowLegacy(): Error! Can't init OpenGl!")
 		panic(err)
 	}
 
-	state.oglContextType = OGlContextLegacy
+	state.contextInfo[1] = gl.GoStr(gl.GetString(gl.RENDERER))
+	state.contextInfo[2] = gl.GoStr(gl.GetString(gl.VERSION))
+	state.contextInfo[3] = gl.GoStr(gl.GetString(gl.SHADING_LANGUAGE_VERSION))
+
+	state.oglContextType = oglContextLegacy
 }
 
 func (state *SAppState) SetOglDefaults() {
