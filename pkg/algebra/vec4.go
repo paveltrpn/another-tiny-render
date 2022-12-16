@@ -1,4 +1,4 @@
-package algebra_go
+package algebra
 
 type Vec4 [4]float32
 
@@ -42,10 +42,10 @@ func Vec4Normalize(v Vec4) (rt Vec4) {
 }
 
 func Vec4Scale(v Vec4, scale float32) (rt Vec4) {
-	v[0] *= scale
-	v[1] *= scale
-	v[2] *= scale
-	v[3] *= scale
+	rt[0] = v[0] * scale
+	rt[1] = v[1] * scale
+	rt[2] = v[2] * scale
+	rt[3] = v[3] * scale
 
 	return rt
 }

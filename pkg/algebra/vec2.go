@@ -1,4 +1,4 @@
-package algebra_go
+package algebra
 
 type Vec2 [2]float32
 

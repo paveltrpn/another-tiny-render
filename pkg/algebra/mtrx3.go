@@ -1,4 +1,4 @@
-package algebra_go
+package algebra
 
 import (
 	"fmt"
@@ -255,7 +255,7 @@ func Mtrx3lu(m Mtrx3) (l, u Mtrx3) {
 */
 
 /*
-	Нижнетреугольная (L, lm) матрица имеет единицы по диагонали
+Нижнетреугольная (L, lm) матрица имеет единицы по диагонали
 */
 func Mtrx3LU(m Mtrx3) (lm, um Mtrx3) {
 	const (

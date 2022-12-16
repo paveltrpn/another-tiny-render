@@ -2,7 +2,7 @@ package main
 
 import (
 	srv "another-tiny-render/internal/service"
-	alg "another-tiny-render/pkg/algebra_go"
+	alg "another-tiny-render/pkg/algebra"
 	"fmt"
 	"runtime"
 

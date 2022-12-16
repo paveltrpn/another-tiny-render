@@ -1,7 +1,7 @@
 package geometry
 
 import (
-	alg "another-tiny-render/pkg/algebra_go"
+	alg "another-tiny-render/pkg/algebra"
 )
 
 func (gmtry *SGmtryInstance) ScaleVerticesFloat(factor float32) {

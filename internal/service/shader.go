@@ -1,7 +1,7 @@
 package service
 
 import (
-	alg "another-tiny-render/pkg/algebra_go"
+	alg "another-tiny-render/pkg/algebra"
 	"fmt"
 	"io/ioutil"
 	"os"

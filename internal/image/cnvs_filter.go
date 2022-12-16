@@ -1,7 +1,7 @@
 package image
 
 import (
-	alg "another-tiny-render/pkg/algebra_go"
+	alg "another-tiny-render/pkg/algebra"
 	fgblur "another-tiny-render/pkg/fast_gauss_blur"
 	"math"
 )

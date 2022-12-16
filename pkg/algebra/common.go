@@ -1,4 +1,4 @@
-package algebra_go
+package algebra
 
 import (
 	"math"

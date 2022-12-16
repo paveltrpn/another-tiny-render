@@ -1,7 +1,7 @@
 package image
 
 import (
-	alg "another-tiny-render/pkg/algebra_go"
+	alg "another-tiny-render/pkg/algebra"
 )
 
 // Set color to pixel at pen_color[x, y].

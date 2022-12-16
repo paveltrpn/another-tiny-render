@@ -12,7 +12,7 @@ import (
 	gmtry "another-tiny-render/internal/geometry"
 	img "another-tiny-render/internal/image"
 	srv "another-tiny-render/internal/service"
-	alg "another-tiny-render/pkg/algebra_go"
+	alg "another-tiny-render/pkg/algebra"
 )
 
 func main() {

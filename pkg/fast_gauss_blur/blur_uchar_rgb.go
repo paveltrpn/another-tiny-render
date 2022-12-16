@@ -1,7 +1,7 @@
 package fastgaussblur
 
 import (
-	alg "another-tiny-render/pkg/algebra_go"
+	alg "another-tiny-render/pkg/algebra"
 )
 
 // Golang interpretation of fast Gaussian blur algorithm by Ivan Kutskir.
@@ -21,19 +21,19 @@ import (
 //! Unsigned char version
 //!
 
-//!
-//! \fn void std_to_box(float boxes[], float sigma, int n)
-//!
-//! \brief this function converts the standard deviation of
-//! Gaussian blur into dimensions of boxes for box blur. For
-//! further details please refer to :
-//! https://www.peterkovesi.com/matlabfns/#integral
-//! https://www.peterkovesi.com/papers/FastGaussianSmoothing.pdf
-//!
-//! \param[out] boxes   boxes dimensions
-//! \param[in] sigma    Gaussian standard deviation
-//! \param[in] n        number of boxes
-//!
+// !
+// ! \fn void std_to_box(float boxes[], float sigma, int n)
+// !
+// ! \brief this function converts the standard deviation of
+// ! Gaussian blur into dimensions of boxes for box blur. For
+// ! further details please refer to :
+// ! https://www.peterkovesi.com/matlabfns/#integral
+// ! https://www.peterkovesi.com/papers/FastGaussianSmoothing.pdf
+// !
+// ! \param[out] boxes   boxes dimensions
+// ! \param[in] sigma    Gaussian standard deviation
+// ! \param[in] n        number of boxes
+// !
 func std_to_box(boxes []int, sigma float32, n int) {
 	var wi float32 = alg.Sqrtf((12 * sigma * sigma / float32(n)) + 1)
 	var wl int = int(alg.Floor(wi))
@@ -54,18 +54,18 @@ func std_to_box(boxes []int, sigma float32, n int) {
 	}
 }
 
-//!
-//! \fn void horizontal_blur_rgb(uchar * in, uchar * out, int w, int h, int c, int r)
-//!
-//! \brief this function performs the horizontal blur pass for box blur.
-//!
-//! \param[in,out] in       source channel
-//! \param[in,out] out      target channel
-//! \param[in] w            image width
-//! \param[in] h            image height
-//! \param[in] c            image channels
-//! \param[in] r            box dimension
-//!
+// !
+// ! \fn void horizontal_blur_rgb(uchar * in, uchar * out, int w, int h, int c, int r)
+// !
+// ! \brief this function performs the horizontal blur pass for box blur.
+// !
+// ! \param[in,out] in       source channel
+// ! \param[in,out] out      target channel
+// ! \param[in] w            image width
+// ! \param[in] h            image height
+// ! \param[in] c            image channels
+// ! \param[in] r            box dimension
+// !
 func horizontal_blur_rgb(in []uint8, out []uint8, w, h, c, r int) {
 	var iarr float32 = 1.0 / (float32(r + r + 1))
 	for i := 0; i < h; i++ {
@@ -112,18 +112,18 @@ func horizontal_blur_rgb(in []uint8, out []uint8, w, h, c, r int) {
 	}
 }
 
-//!
-//! \fn void total_blur_rgb(uchar * in, uchar * out, int w, int h, int c, int r)
-//!
-//! \brief this function performs the total blur pass for box blur.
-//!
-//! \param[in,out] in       source channel
-//! \param[in,out] out      target channel
-//! \param[in] w            image width
-//! \param[in] h            image height
-//! \param[in] c            image channels
-//! \param[in] r            box dimension
-//!
+// !
+// ! \fn void total_blur_rgb(uchar * in, uchar * out, int w, int h, int c, int r)
+// !
+// ! \brief this function performs the total blur pass for box blur.
+// !
+// ! \param[in,out] in       source channel
+// ! \param[in,out] out      target channel
+// ! \param[in] w            image width
+// ! \param[in] h            image height
+// ! \param[in] c            image channels
+// ! \param[in] r            box dimension
+// !
 func total_blur_rgb(in []uint8, out []uint8, w, h, c, r int) {
 	// radius range on either side of a pixel + the pixel itself
 	var iarr float32 = 1.0 / (float32(r + r + 1))
@@ -171,18 +171,18 @@ func total_blur_rgb(in []uint8, out []uint8, w, h, c, r int) {
 	}
 }
 
-//!
-//! \fn void box_blur_rgb(uchar * in, uchar * out, int w, int h, int c, int r)
-//!
-//! \brief this function performs a box blur pass.
-//!
-//! \param[in,out] in       source channel
-//! \param[in,out] out      target channel
-//! \param[in] w            image width
-//! \param[in] h            image height
-//! \param[in] c            image channels
-//! \param[in] r            box dimension
-//!
+// !
+// ! \fn void box_blur_rgb(uchar * in, uchar * out, int w, int h, int c, int r)
+// !
+// ! \brief this function performs a box blur pass.
+// !
+// ! \param[in,out] in       source channel
+// ! \param[in,out] out      target channel
+// ! \param[in] w            image width
+// ! \param[in] h            image height
+// ! \param[in] c            image channels
+// ! \param[in] r            box dimension
+// !
 func box_blur_rgb(in *[]uint8, out *[]uint8, w, h, c, r int) {
 	in, out = out, in
 	horizontal_blur_rgb((*out), (*in), w, h, c, r)
@@ -191,21 +191,21 @@ func box_blur_rgb(in *[]uint8, out *[]uint8, w, h, c, r int) {
 	// here we could go anisotropic with different radiis rx,ry in HBlur and TBlur
 }
 
-//!
-//! \fn void fast_gaussian_blur_rgb(uchar * in, uchar * out, int w, int h, int c, float sigma)
-//!
-//! \brief this function performs a fast Gaussian blur. Applying several
-//! times box blur tends towards a true Gaussian blur. Three passes are sufficient
-//! for good results. For further details please refer to :
-//! http://blog.ivank.net/fastest-gaussian-blur.html
-//!
-//! \param[in,out] in       source channel
-//! \param[in,out] out      target channel
-//! \param[in] w            image width
-//! \param[in] h            image height
-//! \param[in] c            image channels
-//! \param[in] sigma        gaussian std dev
-//!
+// !
+// ! \fn void fast_gaussian_blur_rgb(uchar * in, uchar * out, int w, int h, int c, float sigma)
+// !
+// ! \brief this function performs a fast Gaussian blur. Applying several
+// ! times box blur tends towards a true Gaussian blur. Three passes are sufficient
+// ! for good results. For further details please refer to :
+// ! http://blog.ivank.net/fastest-gaussian-blur.html
+// !
+// ! \param[in,out] in       source channel
+// ! \param[in,out] out      target channel
+// ! \param[in] w            image width
+// ! \param[in] h            image height
+// ! \param[in] c            image channels
+// ! \param[in] sigma        gaussian std dev
+// !
 func fast_gaussian_blur_rgb(in []uint8, out []uint8, w int, h int, c int, sigma float32) {
 	// sigma conversion to box dimensions
 	var boxes = []int{0, 0, 0}
